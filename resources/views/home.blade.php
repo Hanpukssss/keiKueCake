@@ -203,36 +203,49 @@
         </section>
 
         <section id="quick-order" class="py-12">
-            <div class="max-w-5xl mx-auto bg-white/90 rounded-3xl shadow-lg p-6 border border-rose-50">
-                <div class="flex flex-col md:flex-row gap-6">
-                    <div class="md:w-1/2 space-y-3">
+            <div class="max-w-6xl mx-auto bg-white/90 rounded-3xl shadow-lg p-8 border border-rose-50">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-3">
                         <p class="text-xs uppercase tracking-[0.2em] text-rose-500 font-semibold">Quick order</p>
-                        <h2 class="text-2xl font-bold text-slate-900">Pesan langsung dari stok.</h2>
+                        <h2 class="text-3xl font-bold text-slate-900">Pesan langsung dari stok.</h2>
                         <p class="text-sm text-slate-700">Pilih produk dengan stok tersedia. Jika habis, akan ada pemberitahuan.</p>
-                        <form id="quickOrderForm" class="space-y-3">
-                            <div>
+                        <form id="quickOrderForm" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-sm font-semibold text-slate-800">Nama</label>
+                                    <input id="orderName" type="text" required class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300" placeholder="Nama pemesan">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-sm font-semibold text-slate-800">No. WA</label>
+                                    <input id="orderPhone" type="tel" required class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300" placeholder="08xxxxxxxxxx">
+                                </div>
+                            </div>
+                            <div class="space-y-1">
                                 <label class="text-sm font-semibold text-slate-800">Produk</label>
-                                <select id="productSelect" class="w-full rounded-xl border border-rose-100 px-3 py-3 focus:ring-2 focus:ring-rose-300 bg-white">
+                                <select id="productSelect" class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300 bg-white">
                                     <option value="">Memuat produk...</option>
                                 </select>
-                                <p id="productInfo" class="text-sm text-slate-600 mt-1"></p>
+                                <p id="productInfo" class="text-sm text-slate-700 mt-1"></p>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1">
                                     <label class="text-sm font-semibold text-slate-800">Qty</label>
-                                    <input id="orderQty" type="number" min="1" value="1" class="w-full rounded-xl border border-rose-100 px-3 py-3 focus:ring-2 focus:ring-rose-300">
+                                    <input id="orderQty" type="number" min="1" value="1" class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300">
                                 </div>
-                                <div>
+                                <div class="space-y-1">
                                     <label class="text-sm font-semibold text-slate-800">Tanggal (opsional)</label>
-                                    <input type="date" class="w-full rounded-xl border border-rose-100 px-3 py-3 focus:ring-2 focus:ring-rose-300">
+                                    <input type="date" class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300">
                                 </div>
                             </div>
-                            <textarea rows="3" placeholder="Catatan (opsional)" class="w-full rounded-xl border border-rose-100 px-3 py-2 focus:ring-2 focus:ring-rose-300"></textarea>
-                            <button class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl">Kirim Transaksi</button>
+                            <div class="space-y-1">
+                                <label class="text-sm font-semibold text-slate-800">Produk yang diinginkan / catatan (opsional)</label>
+                                <textarea id="orderNotes" rows="3" class="w-full rounded-xl border border-rose-100 px-4 py-3 focus:ring-2 focus:ring-rose-300" placeholder="Tuliskan permintaan khusus"></textarea>
+                            </div>
                             <p id="quickOrderMessage" class="text-sm text-rose-600"></p>
+                            <button class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl shadow-lg">Kirim Transaksi</button>
                         </form>
                     </div>
-                    <div class="md:w-1/2 space-y-4">
+                    <div class="space-y-4">
                         <div class="rounded-2xl overflow-hidden shadow">
                             <iframe
                                 class="w-full h-64"
@@ -371,11 +384,16 @@
         const bestGrid = document.getElementById('bestGrid');
         const bestError = document.getElementById('bestError');
         const quickOrderForm = document.getElementById('quickOrderForm');
+        const orderName = document.getElementById('orderName');
+        const orderPhone = document.getElementById('orderPhone');
+        const orderNotes = document.getElementById('orderNotes');
         const quickOrderMessage = document.getElementById('quickOrderMessage');
         const navAuthBtn = document.getElementById('navAuthBtn');
         const productSelect = document.getElementById('productSelect');
         const productInfo = document.getElementById('productInfo');
         const orderQty = document.getElementById('orderQty');
+        const orderDate = document.getElementById('orderDate');
+        const submitBtn = document.querySelector('#quickOrderForm button[type="submit"]');
         let orderProducts = [];
         const heroImageA = document.getElementById('heroImageA');
         const heroImageB = document.getElementById('heroImageB');
@@ -505,10 +523,37 @@
         quickOrderForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             quickOrderMessage.textContent = '';
+            quickOrderMessage.className = 'text-sm';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Mengirim...';
+            }
             const token = localStorage.getItem('token');
             if (!token) {
                 quickOrderMessage.textContent = 'Login dulu untuk memesan.';
                 setTimeout(() => (window.location.href = '/login'), 600);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
+                return;
+            }
+            if (!orderName?.value) {
+                quickOrderMessage.textContent = 'Nama wajib diisi.';
+                showToast('Nama wajib diisi.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
+                return;
+            }
+            if (!orderPhone?.value) {
+                quickOrderMessage.textContent = 'No. WA wajib diisi.';
+                showToast('No. WA wajib diisi.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
                 return;
             }
             const selected = orderProducts.find(p => p.uuid === productSelect.value);
@@ -516,16 +561,28 @@
             if (!selected) {
                 quickOrderMessage.textContent = 'Pilih produk yang tersedia.';
                 showToast('Pilih produk yang tersedia.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
                 return;
             }
             if (qty <= 0) {
                 quickOrderMessage.textContent = 'Qty minimal 1.';
                 showToast('Qty minimal 1.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
                 return;
             }
             if (selected.stock < qty) {
                 quickOrderMessage.textContent = 'Barang tidak tersedia atau stok kurang.';
                 showToast('Barang tidak tersedia atau stok kurang.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
                 return;
             }
             try {
@@ -537,18 +594,29 @@
                         'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify({
+                        name: orderName?.value || '',
+                        phone: orderPhone?.value || '',
+                        notes: orderNotes?.value || '',
                         product_uuid: selected.uuid,
                         qty,
+                        date_required: orderDate?.value || null,
                     })
                 });
                 const data = await res.json();
                 if (!res.ok) {
                     quickOrderMessage.textContent = data.message || 'Gagal membuat transaksi.';
                     showToast(quickOrderMessage.textContent, 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Kirim Transaksi';
+                    }
                     return;
                 }
                 quickOrderMessage.textContent = 'Pesanan berhasil dibuat!';
+                quickOrderMessage.className = 'text-sm text-emerald-600';
                 showToast('Pesanan berhasil dibuat!', 'success');
+                // reset form ringan
+                quickOrderForm.reset();
                 // kurangi stok lokal dan refresh info
                 selected.stock = Math.max(0, selected.stock - qty);
                 updateProductInfo();
@@ -559,6 +627,11 @@
             } catch (err) {
                 quickOrderMessage.textContent = 'Terjadi kesalahan. Coba lagi.';
                 showToast('Terjadi kesalahan. Coba lagi.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Transaksi';
+                }
             }
         });
 
@@ -575,7 +648,8 @@
                 navAuthBtn.textContent = 'Dashboard';
                 navAuthBtn.href = '/dashboard';
             } else {
-                navAuthBtn.remove(); // user tetap pakai link katalog di nav utama
+                navAuthBtn.textContent = 'Home';
+                navAuthBtn.href = '/home';
             }
         })();
 

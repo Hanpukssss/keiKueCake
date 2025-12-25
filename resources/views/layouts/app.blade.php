@@ -39,16 +39,13 @@
         const role = localStorage.getItem('role');
         const path = window.location.pathname;
 
-        if (role !== 'admin') {
-            adminLinks.forEach(link => link.classList.add('hidden'));
-        } else {
-            adminLinks.forEach(link => {
-                link.classList.remove('hidden');
-                if (link.getAttribute('href') === path) {
-                    link.classList.add('bg-rose-100', 'text-rose-700');
-                }
-            });
-        }
+        // Link admin tidak lagi disembunyikan agar menu stabil
+        adminLinks.forEach(link => {
+            link.classList.remove('hidden');
+            if (link.getAttribute('href') === path) {
+                link.classList.add('bg-rose-100', 'text-rose-700');
+            }
+        });
 
         if (logoutBtn) {
             logoutBtn.addEventListener('click', async () => {

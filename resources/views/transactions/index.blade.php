@@ -48,29 +48,6 @@
     </div>
 </div>
 
-<div class="grid md:grid-cols-3 gap-4">
-    <div class="md:col-span-2 bg-white shadow rounded-2xl p-4">
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="font-semibold">Pesanan Quick Order</h3>
-            <span id="qoCount" class="text-sm text-slate-600"></span>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-left text-slate-600">
-                        <th class="py-2">Nama</th>
-                        <th class="py-2">WA</th>
-                        <th class="py-2">Produk</th>
-                        <th class="py-2">Qty</th>
-                        <th class="py-2">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="qoTable" class="divide-y divide-slate-100"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
 <div id="statusModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
     <div class="relative max-w-md mx-auto mt-20 bg-white rounded-2xl shadow-2xl p-6 border border-rose-50">
@@ -123,8 +100,6 @@
     const statusSelect = document.getElementById('statusSelect');
     const statusUuid = document.getElementById('statusUuid');
     const statusError = document.getElementById('statusError');
-    const qoTable = document.getElementById('qoTable');
-    const qoCount = document.getElementById('qoCount');
     let productsCache = [];
 
     async function loadProductsForSelect() {
@@ -269,37 +244,7 @@
         loadTransactions();
     });
 
-    async function loadQuickOrders() {
-        qoTable.innerHTML = '<tr><td class="py-3 text-slate-500" colspan="5">Memuat...</td></tr>';
-        try {
-            const res = await fetch('/api/quick-orders', { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } });
-            if (!res.ok) {
-                qoTable.innerHTML = '<tr><td class="py-3 text-rose-600" colspan="5">Gagal memuat quick order</td></tr>';
-                return;
-            }
-            const data = await res.json();
-            qoCount.textContent = `${data.total} pesanan`;
-            qoTable.innerHTML = '';
-            data.data.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="py-2">${item.name}</td>
-                    <td class="py-2">${item.phone}</td>
-                    <td class="py-2">${item.product}</td>
-                    <td class="py-2">${item.qty}</td>
-                    <td class="py-2">
-                        <span class="px-2 py-1 rounded-full text-xs bg-slate-100">${item.status}</span>
-                    </td>
-                `;
-                qoTable.appendChild(tr);
-            });
-        } catch (e) {
-            qoTable.innerHTML = '<tr><td class="py-3 text-rose-600" colspan="5">Gagal memuat quick order</td></tr>';
-        }
-    }
-
     loadProductsForSelect();
     loadTransactions();
-    loadQuickOrders();
 </script>
 @endsection
